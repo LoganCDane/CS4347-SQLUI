@@ -4,11 +4,16 @@ import java.util.Arrays;
 
 public class Runner {
     static MySQLAccess sql = new MySQLAccess();
-    static int xSize = 100;
+    static int xSize = 200;
     static int ySize = 100;
+
+    static double backX = xSize*.05;
+    static double backY = ySize*.05;
+
     public static void main(String[] args) throws Exception {
         StdDraw.enableDoubleBuffering();
         StdDraw.setTitle("LolBase Connection");
+        StdDraw.setCanvasSize(1000,500);
         StdDraw.setXscale(0, xSize);
         StdDraw.setYscale(0, ySize);
         StdDraw.show();
@@ -23,14 +28,16 @@ public class Runner {
     private static void Drawer() throws Exception {
 
         ArrayList<Button> buttons = new ArrayList<>();
-        int center = 50;
-        int hh = 7;
-        buttons.add(new Button(center, center+(hh*6), 25, hh, Color.BLUE, "SELECT"));
-        buttons.add(new Button(center, center+(hh*3), 25, hh, Color.blue, "INSERT" ));
-        buttons.add(new Button(center, center, 25, hh, Color.BLUE, "UPDATE"));
-        buttons.add(new Button(center, center-(hh*3), 25, hh, Color.blue, "DELETE" ));
-        buttons.add(new Button(center, center-(hh*6), 25, hh, Color.BLUE, "Prepared Statement"));
-        buttons.add(new Button(5, 5, 5, 5, Color.red, "<-"));
+        int xCenter = xSize/2;
+        int yCenter = ySize/2;
+        double hh = (ySize*0.07);
+        double hw = xSize/4.0;
+        buttons.add(new Button(xCenter, yCenter+(hh*6), hw, hh, Color.BLUE, "SELECT"));
+        buttons.add(new Button(xCenter, yCenter+(hh*3), hw, hh, Color.blue, "INSERT" ));
+        buttons.add(new Button(xCenter, yCenter, hw, hh, Color.BLUE, "UPDATE"));
+        buttons.add(new Button(xCenter, yCenter-(hh*3), hw, hh, Color.blue, "DELETE" ));
+        buttons.add(new Button(xCenter, yCenter-(hh*6), hw, hh, Color.BLUE, "Prepared Statement"));
+        buttons.add(new Button(backX, backY, backX, backY, Color.red, "<-"));
         boolean prevClick = false;
         while (true) {
 
@@ -75,8 +82,8 @@ public class Runner {
     private static void CommandWindow(String command){
         boolean prevClick = true;
         StringBuilder input = new StringBuilder();
-        Button confirm = new Button(50, 30, 10, 10, Color.BLUE, "CONFIRM");
-        Button back = new Button(5, 5, 5, 5, Color.red, "<-");
+        Button confirm = new Button(xSize*.5, ySize*.3, xSize*.1, ySize*.1, Color.BLUE, "CONFIRM");
+        Button back = new Button(backX, backY, backX, backY, Color.red, "<-");
         while (true) {
             if(!StdDraw.isMousePressed()) prevClick = false;
             while (StdDraw.hasNextKeyTyped()) {
@@ -91,13 +98,29 @@ public class Runner {
             }
             if(!input.isEmpty() && !prevClick && StdDraw.isMousePressed() && confirm.inBounds()){
                 try {
-                    if(command.equals("SELECT")) {
-                        String[][] output = sql.readDatabase(command + " " + input);
-                        System.out.println(Arrays.deepToString(output));
-                        outputPrinter(output);
+                    if(!input.toString().contains(";")) {
+                        if (command.equals("SELECT")) {
+                            String[][] output = sql.readDatabase(command + " " + input);
+                            System.out.println(Arrays.deepToString(output));
+                            outputPrinter(output);
+                        } else {
+                            System.out.println(sql.insertDatabase(command + " " + input));
+                        }
                     }
-                    else {
-                        System.out.println(sql.insertDatabase(command + " " + input));
+                    else{
+                        String[] commands = input.toString().split(";");
+                        commands[0] = command + " " + commands[0];
+                        for (int i = 0; i < commands.length; i++) {
+                            System.out.println(commands[i].toLowerCase());
+                            if(commands[i].toLowerCase().contains("select")){
+                                String[][] output = sql.readDatabase(commands[i]);
+                                System.out.println(Arrays.deepToString(output));
+                                outputPrinter(output);
+                            }
+                            else{
+                                System.out.println(sql.insertDatabase(commands[i]));
+                            }
+                        }
                     }
                     prevClick = true;
 
@@ -110,11 +133,11 @@ public class Runner {
             }
 
             StdDraw.setPenColor(Color.black);
-            int textX = 7;
-            int textY = 50;
-            StdDraw.rectangle(textX,textY,7, 2.5);
+            double textX = xSize*.1;
+            double textY = ySize*.50;
+            StdDraw.rectangle(textX,textY,xSize*.1, ySize*0.025);
             StdDraw.text(textX, textY, command);
-            StdDraw.textLeft(16, textY, input.toString());
+            StdDraw.textLeft(xSize*.2, textY, input.toString());
 
             confirm.draw();
             back.draw();
@@ -127,14 +150,17 @@ public class Runner {
     private static void preparedStatements() throws Exception {
         boolean prevClick = true;
         ArrayList<Button> statements = new ArrayList<>();
-        statements.add(new Button(50, 85, 40, 5, Color.blue, "Show all Players Sorted By Win Rate"));
-        statements.add(new Button(50, 70, 40, 5, Color.blue, "Show all Players Sorted by KDA Ratio"));
-        statements.add(new Button(50, 55, 40, 5, Color.blue, "Show Stats of All Teams in Each Tournament"));
-        statements.add(new Button(50, 40, 40, 5, Color.blue, "Show all Champions ordered by their pick rate"));
-        statements.add(new Button(50, 25, 40, 5, Color.blue, "Show each team and the number of players on that team"));
-        statements.add(new Button(50, 10, 40, 5, Color.blue, "Current Standing of a given tournament"));
+        double xCenter = xSize*.5;
+        double xWidth = xSize*.40;
+        double yHeight = ySize*.05;
+        statements.add(new Button(xCenter, ySize*.85, xWidth, yHeight, Color.blue, "Show all Players Sorted By Win Rate"));
+        statements.add(new Button(xCenter, ySize*.70, xWidth, yHeight, Color.blue, "Show all Players Sorted by KDA Ratio"));
+        statements.add(new Button(xCenter, ySize*.55, xWidth, yHeight, Color.blue, "Show Stats of All Teams in Each Tournament"));
+        statements.add(new Button(xCenter, ySize*.40, xWidth, yHeight, Color.blue, "Show all Champions ordered by their pick rate"));
+        statements.add(new Button(xCenter, ySize*.25, xWidth, yHeight, Color.blue, "Show each team and the number of players on that team"));
+        statements.add(new Button(xCenter, ySize*.10, xWidth, yHeight, Color.blue, "Current Standing of a given tournament"));
 
-        statements.add(new Button( 5, 5, 5 ,5, Color.red, "<-"));
+        statements.add(new Button( backX, backY, backX ,backY, Color.red, "<-"));
 
         while(true){
             if(!StdDraw.isMousePressed()) prevClick = false;
@@ -181,7 +207,7 @@ public class Runner {
 
     private static void TourneySelector() throws Exception {
         boolean prevClick = true;
-        Button back = new Button(5, 5, 5, 5, Color.red, "<-");
+        Button back = new Button(backX, backY, backX, backY, Color.red, "<-");
         String[][] output = sql.readDatabase("select Tournament_Name from Tournament");
         ArrayList<Button> buttons = new ArrayList<>();
         System.out.println(Arrays.deepToString(output));
@@ -198,21 +224,20 @@ public class Runner {
         }
         System.out.println(buttons.size());
         while (true){
-            for (int i = 0; i < buttons.size(); i++) {
-                if(!StdDraw.isMousePressed()) prevClick = false;
-                Button button = buttons.get(i);
-                button.draw();
-                if(!prevClick && StdDraw.isMousePressed() && button.inBounds()){
+            for (Button value : buttons) {
+                if (!StdDraw.isMousePressed()) prevClick = false;
+                value.draw();
+                if (!prevClick && StdDraw.isMousePressed() && value.inBounds()) {
                     outputPrinter(sql.readDatabase("Select * from(" +
                             "(Select Winner as Team, Count(Winner) as Games_Won " +
                             "From Series " +
-                            "Where Tournament_Name = '" + button.getText() +
+                            "Where Tournament_Name = '" + value.getText() +
                             "' Group by Team) " +
                             "Union " +
                             "(Select Team_Name, 0 " +
                             "From ParticipatedInTourney " +
-                            "Where Tournament_Name = '" + button.getText() + "' AND Team_Name NOT IN " +
-                            "(Select Winner FROM Series Where Tournament_Name = '" + button.getText() + "' ))) AS temp " +
+                            "Where Tournament_Name = '" + value.getText() + "' AND Team_Name NOT IN " +
+                            "(Select Winner FROM Series Where Tournament_Name = '" + value.getText() + "' ))) AS temp " +
                             "Order By Games_Won Desc;"));
                     prevClick = true;
                 }
@@ -232,7 +257,7 @@ public class Runner {
 
 
     private static void outputPrinter(String[][] output){
-        Button button = new Button(5, 5, 2.5, 2.5, Color.red, "<-");
+        Button button = new Button(backX, backY, backX, backY, Color.red, "<-");
 
         boolean prevClick = true;
         double boxWidth, boxHeight;
@@ -247,8 +272,8 @@ public class Runner {
             if(!StdDraw.isMousePressed()) prevClick = false;
             for (int i = 0; i < output.length; i++) {
                 for (int j = 0; j < output[i].length; j++) {
-                    double x = ((boxWidth * i))+(boxWidth/2)+5;
-                    double y = ySize - (((boxHeight * j)+boxHeight/2)+5);
+                    double x = ((boxWidth * i))+(boxWidth/2)+(xSize*.05);
+                    double y = ySize - (((boxHeight * j)+boxHeight/2)+(ySize*.05));
                     //System.out.println(x + " " + y);
                     StdDraw.rectangle(x, y, boxWidth/2, boxHeight/2);
                     //StdDraw.text(x, y, ((int)x) + ", " + ((int)y));
