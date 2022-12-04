@@ -62,7 +62,6 @@ public class Runner {
                         prevClick = true;
                     }
                     else if(i == 4){
-                        //TODO: Add Prepared statements
                         preparedStatements();
                         prevClick = true;
                     }
@@ -189,7 +188,6 @@ public class Runner {
                         prevClick = true;
                     }
                     else if(i == 5){
-                        //TODO: make a new menu
                         TourneySelector();
                         prevClick = true;
                     }
