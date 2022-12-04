@@ -6,19 +6,23 @@ public class Runner {
     static MySQLAccess sql = new MySQLAccess();
     static int xSize = 100;
     static int ySize = 100;
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         StdDraw.enableDoubleBuffering();
         StdDraw.setTitle("LolBase Connection");
         StdDraw.setXscale(0, xSize);
         StdDraw.setYscale(0, ySize);
         StdDraw.show();
         Drawer();
+
+        StdDraw.clear();
+        StdDraw.show();
+        System.exit(0);
         //outputPrinter(sql.readDatabase("select * from team"));
     }
 
-    private static void Drawer() throws Exception {
+    private static void Drawer() {
 
-        ArrayList<Button> buttons = new ArrayList<Button>();
+        ArrayList<Button> buttons = new ArrayList<>();
         int center = 50;
         int hh = 7;
         buttons.add(new Button(center, center+(hh*6), 25, hh, Color.BLUE, "SELECT"));
@@ -26,6 +30,7 @@ public class Runner {
         buttons.add(new Button(center, center, 25, hh, Color.BLUE, "UPDATE"));
         buttons.add(new Button(center, center-(hh*3), 25, hh, Color.blue, "DELETE" ));
         buttons.add(new Button(center, center-(hh*6), 25, hh, Color.BLUE, "Prepared Statement"));
+        buttons.add(new Button(5, 5, 5, 5, Color.red, "<-"));
         boolean prevClick = false;
         while (true) {
 
@@ -33,7 +38,6 @@ public class Runner {
                 if(!StdDraw.isMousePressed()) prevClick = false;
                 Button button = buttons.get(i);
                 if (!prevClick && StdDraw.isMousePressed() && button.inBounds(StdDraw.mouseX(), StdDraw.mouseY())) {
-                    //System.out.println(Arrays.deepToString(sql.readDatabase2()));
                     if(i == 0){
                         CommandWindow("SELECT");
                         prevClick = true;
@@ -54,6 +58,9 @@ public class Runner {
                         //TODO: Add Prepared statements
                         prevClick = true;
                     }
+                    else if(i ==5){
+                        return;
+                    }
                 }
                 button.draw();
             }
@@ -65,7 +72,7 @@ public class Runner {
     }
     
     private static void CommandWindow(String command){
-        Boolean prevClick = true;
+        boolean prevClick = true;
         StringBuilder input = new StringBuilder();
         Button confirm = new Button(50, 30, 10, 10, Color.BLUE, "CONFIRM");
         Button back = new Button(30, 30, 5, 5, Color.red, "<-");
@@ -83,7 +90,7 @@ public class Runner {
             }
             if(!prevClick && StdDraw.isMousePressed() && confirm.inBounds()){
                 try {
-                    String[][] output = sql.readDatabase(command + " " + input.toString());
+                    String[][] output = sql.readDatabase(command + " " + input);
                     System.out.println(Arrays.deepToString(output));
                     outputPrinter(output);
 
@@ -134,7 +141,7 @@ public class Runner {
                     StdDraw.text(x,y,output[i][j]);
                 }
             }
-            if(StdDraw.isMousePressed() && button.inBounds()){
+            if(!prevClick && StdDraw.isMousePressed() && button.inBounds()){
                 return;
             }
             button.draw();
