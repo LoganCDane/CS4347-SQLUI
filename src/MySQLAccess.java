@@ -108,6 +108,16 @@ public class MySQLAccess {
         String[][] arr = ListToArray(values);
         return arr;
     }
+
+    public boolean insertDatabase(String command)throws Exception{
+        connect = DriverManager
+                .getConnection("jdbc:mysql://localhost/lolbase?"
+                        + "user=newuser&password=password");
+
+        statement = connect.createStatement();
+        boolean happened = statement.execute(command);
+        return happened;
+    }
     private void writeMetaData(ResultSet resultSet) throws SQLException {
         //  Now get some metadata from the database
         // Result set get the result of the SQL query
