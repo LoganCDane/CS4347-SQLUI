@@ -1,18 +1,19 @@
 import java.awt.*;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Runner {
     static MySQLAccess sql = new MySQLAccess();
-
+    static int xSize = 100;
+    static int ySize = 100;
     public static void main(String[] args) throws Exception {
         StdDraw.enableDoubleBuffering();
         StdDraw.setTitle("LolBase Connection");
-        StdDraw.setScale(0, 100);
+        StdDraw.setXscale(0, xSize);
+        StdDraw.setYscale(0, ySize);
         StdDraw.show();
         Drawer();
-
+        //outputPrinter(sql.readDatabase("select * from team"));
     }
 
     private static void Drawer() throws Exception {
@@ -82,7 +83,10 @@ public class Runner {
             }
             if(!prevClick && StdDraw.isMousePressed() && confirm.inBounds()){
                 try {
-                    System.out.println(Arrays.deepToString(sql.readDatabase(command + " " + input.toString())));
+                    String[][] output = sql.readDatabase(command + " " + input.toString());
+                    System.out.println(Arrays.deepToString(output));
+                    outputPrinter(output);
+
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -106,5 +110,37 @@ public class Runner {
         }
     }
 
+
+    private static void outputPrinter(String[][] output){
+        Button button = new Button(5, 5, 2.5, 2.5, Color.red, "<-");
+
+        boolean prevClick = true;
+        double boxWidth, boxHeight;
+        boxWidth = ((xSize*.9)/output.length);
+        boxHeight = ((ySize*.9)/output[0].length);
+        System.out.println(output.length);
+        System.out.println(output[0].length);
+        System.out.println("BoxWidth: " + boxWidth + ", BoxHeight: " + boxHeight);
+        while (true) {
+            StdDraw.setPenColor(Color.black);
+            if(!StdDraw.isMousePressed()) prevClick = false;
+            for (int i = 0; i < output.length; i++) {
+                for (int j = 0; j < output[i].length; j++) {
+                    double x = ((boxWidth * i))+(boxWidth/2)+5;
+                    double y = ySize - (((boxHeight * j)+boxHeight/2)+5);
+                    //System.out.println(x + " " + y);
+                    StdDraw.rectangle(x, y, boxWidth/2, boxHeight/2);
+                    //StdDraw.text(x, y, ((int)x) + ", " + ((int)y));
+                    StdDraw.text(x,y,output[i][j]);
+                }
+            }
+            if(StdDraw.isMousePressed() && button.inBounds()){
+                return;
+            }
+            button.draw();
+            StdDraw.show();
+            StdDraw.clear();
+        }
+    }
 
 }
