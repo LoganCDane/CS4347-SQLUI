@@ -7,13 +7,16 @@ public class MySQLAccess {
     private Statement statement = null;
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
-
+    
+    private String user = "";
+    private String password = "";
+    
     public void readDataBase() throws Exception {
         try {
             // Setup the connection with the DB
             connect = DriverManager
                     .getConnection("jdbc:mysql://localhost/lolbase?"
-                            + "user=newuser&password=password");
+                            + "user=" + user + "&password=" + password);
 
             // Statements allow to issue SQL queries to the database
             statement = connect.createStatement();
@@ -80,7 +83,7 @@ public class MySQLAccess {
     public String[][] readDatabase(String command) throws Exception{
         connect = DriverManager
                 .getConnection("jdbc:mysql://localhost/lolbase?"
-                        + "user=newuser&password=password");
+                        + "user=" + user + "&password=" + password);
 
         // Statements allow to issue SQL queries to the database
         statement = connect.createStatement();
@@ -111,7 +114,7 @@ public class MySQLAccess {
     public boolean insertDatabase(String command)throws Exception{
         connect = DriverManager
                 .getConnection("jdbc:mysql://localhost/lolbase?"
-                        + "user=newuser&password=password");
+                        + "user=" + user + "&password=" + password);
 
         statement = connect.createStatement();
         boolean happened = statement.execute(command);
